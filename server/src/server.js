@@ -9,8 +9,8 @@ const PORT = process.env.PORT || 5000;
  */
 const validateEnvironment = () => {
   if (!process.env.JWT_SECRET) {
-    console.error('❌ FATAL: Missing required environment variable: JWT_SECRET');
-    process.exit(1);
+    console.warn('⚠️ WARNING: JWT_SECRET was not set. Using a fallback secret. Please set JWT_SECRET in your Railway environment variables!');
+    process.env.JWT_SECRET = 'school_exam_system_prod_jwt_secret_key_change_me_later_123';
   }
 
   const hasDbUrl = process.env.MYSQL_URL || process.env.DATABASE_URL;
