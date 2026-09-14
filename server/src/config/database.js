@@ -3,18 +3,29 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || '127.0.0.1',
-  port: parseInt(process.env.DB_PORT || '3306', 10),
-  user: process.env.DB_USER || 'exam_user',
-  password: process.env.DB_PASSWORD || 'ExamSystem@123',
-  database: process.env.DB_NAME || 'school_exam_system',
-  waitForConnections: true,
-  connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10),
-  queueLimit: 0,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0,
-});
+const poolConfig = process.env.MYSQL_URL || process.env.DATABASE_URL
+  ? {
+      uri: process.env.MYSQL_URL || process.env.DATABASE_URL,
+      waitForConnections: true,
+      connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10),
+      queueLimit: 0,
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 0,
+    }
+  : {
+      host: process.env.MYSQLHOST || process.env.DB_HOST || '127.0.0.1',
+      port: parseInt(process.env.MYSQLPORT || process.env.DB_PORT || '3306', 10),
+      user: process.env.MYSQLUSER || process.env.DB_USER || 'exam_user',
+      password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || 'ExamSystem@123',
+      database: process.env.MYSQLDATABASE || process.env.DB_NAME || 'school_exam_system',
+      waitForConnections: true,
+      connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10),
+      queueLimit: 0,
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 0,
+    };
+
+const pool = mysql.createPool(poolConfig);
 
 /**
  * Initializes database schema if tables are not present
@@ -45,8 +56,21 @@ const initializeSchemaIfEmpty = async () => {
         console.log('✅ Database schema auto-initialized successfully');
       }
     }
+
+    // Auto-seed default admin if users table is empty
+    const [userRows] = await pool.query('SELECT COUNT(*) as count FROM users');
+    if (userRows[0] && userRows[0].count === 0) {
+      const bcrypt = require('bcryptjs');
+      const salt = await bcrypt.genSalt(10);
+      const adminPass = await bcrypt.hash('admin123', salt);
+      await pool.query(
+        'INSERT INTO users (full_name, username, email, password, role, status) VALUES (?, ?, ?, ?, ?, ?)',
+        ['Admin User', 'admin', 'admin@school.edu', adminPass, 'admin', 'active']
+      );
+      console.log('✅ Default admin initialized: username "admin" / password "admin123"');
+    }
   } catch (err) {
-    console.warn('⚠️ Auto-schema verification notice:', err.message);
+    console.warn('⚠️ Auto-schema/seed verification notice:', err.message);
   }
 };
 

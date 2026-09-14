@@ -8,11 +8,18 @@ const PORT = process.env.PORT || 5000;
  * Validate required environment variables before boot
  */
 const validateEnvironment = () => {
-  const required = ['JWT_SECRET', 'DB_HOST', 'DB_USER', 'DB_NAME'];
-  const missing = required.filter((key) => !process.env[key]);
+  if (!process.env.JWT_SECRET) {
+    console.error('❌ FATAL: Missing required environment variable: JWT_SECRET');
+    process.exit(1);
+  }
 
-  if (missing.length > 0) {
-    console.error(`❌ FATAL: Missing required environment variables: ${missing.join(', ')}`);
+  const hasDbUrl = process.env.MYSQL_URL || process.env.DATABASE_URL;
+  const hasDbHost = process.env.DB_HOST || process.env.MYSQLHOST;
+  const hasDbUser = process.env.DB_USER || process.env.MYSQLUSER;
+  const hasDbName = process.env.DB_NAME || process.env.MYSQLDATABASE;
+
+  if (!hasDbUrl && (!hasDbHost || !hasDbUser || !hasDbName)) {
+    console.error('❌ FATAL: Missing required database environment variables (DB_HOST, DB_USER, DB_NAME or MYSQL_URL / MYSQLHOST).');
     console.error('Please configure them in your .env file or deployment environment.');
     process.exit(1);
   }
