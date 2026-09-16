@@ -56,7 +56,8 @@ export const TeacherResults = () => {
     setLoading(true);
     try {
       const res = await resultService.getExamResults(examId);
-      setResults(res.data);
+      const list = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setResults(list);
     } catch (err) {
       toast.error('Failed to load exam submissions');
     } finally {

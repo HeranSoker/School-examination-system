@@ -1,6 +1,7 @@
 import React from 'react';
 
-export const Table = ({ columns, data, loading = false, emptyMessage = 'No data available' }) => {
+export const Table = ({ columns = [], data, loading = false, emptyMessage = 'No data available' }) => {
+  const rows = Array.isArray(data) ? data : (data?.results || data?.exams || data?.users || []);
   return (
     <div className="w-full overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60 glass-card">
       <table className="w-full text-left text-sm text-slate-300">
@@ -23,14 +24,14 @@ export const Table = ({ columns, data, loading = false, emptyMessage = 'No data 
                 </div>
               </td>
             </tr>
-          ) : data.length === 0 ? (
+          ) : rows.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="px-6 py-12 text-center text-slate-500">
                 {emptyMessage}
               </td>
             </tr>
           ) : (
-            data.map((row, rowIndex) => (
+            rows.map((row, rowIndex) => (
               <tr
                 key={row.id || rowIndex}
                 className="hover:bg-slate-800/40 transition-colors duration-150"
