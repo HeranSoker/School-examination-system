@@ -154,19 +154,21 @@ const getStudentAnalytics = async (req, res, next) => {
       [studentId]
     );
 
+    const classId = student[0].class_id || null;
+
     const [upcomingExams] = await pool.query(
-      `SELECT e.id, e.title, e.start_time, e.end_time, e.duration_minutes,
+      `SELECT DISTINCT e.id, e.title, e.start_time, e.end_time, e.duration_minutes,
               s.name as subject_name, e.status
        FROM exams e JOIN subjects s ON e.subject_id = s.id
        LEFT JOIN exam_classes ec ON e.id = ec.exam_id
-       WHERE (ec.class_id = ? OR ec.class_id IS NULL) AND e.status IN ('active', 'scheduled')
+       WHERE (ec.class_id = ? OR ec.class_id IS NULL OR ? IS NULL) AND e.status IN ('active', 'scheduled')
        AND NOT EXISTS (
          SELECT 1 FROM exam_attempts ea 
          WHERE ea.exam_id = e.id AND ea.student_id = ? 
          AND ea.status IN ('submitted', 'auto_submitted', 'graded')
        )
        ORDER BY e.start_time`,
-      [student[0].class_id, studentId]
+      [classId, classId, studentId]
     );
 
     const [completedExams] = await pool.query(

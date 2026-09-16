@@ -33,9 +33,9 @@ export const StudentDashboard = () => {
   if (loading) return <LoadingSpinner label="Loading student examination portal..." />;
 
   const stats = [
-    { label: 'Available Exams', value: data?.availableExamsCount, icon: FileSpreadsheet, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-    { label: 'Exams Completed', value: data?.completedExamsCount, icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { label: 'Average Score', value: `${data?.averageScore}%`, icon: Award, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+    { label: 'Available Exams', value: exams ? exams.length : (data?.availableExamsCount ?? 0), icon: FileSpreadsheet, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+    { label: 'Exams Completed', value: data?.completedExamsCount ?? 0, icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+    { label: 'Average Score', value: `${data?.averageScore ?? 0}%`, icon: Award, color: 'text-amber-400', bg: 'bg-amber-500/10' },
   ];
 
   return (
