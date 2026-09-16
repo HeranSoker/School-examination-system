@@ -41,7 +41,7 @@ class ExamService {
 
     const [exams] = await pool.query(
       `SELECT DISTINCT e.id, e.title, e.description, e.duration_minutes, e.total_marks, e.pass_marks,
-              e.start_time, e.end_time, e.status, e.instructions,
+              e.start_time, e.end_time, e.status, e.instructions, e.created_at,
               s.name as subject_name, s.code as subject_code,
               u.full_name as teacher_name,
               (SELECT COUNT(*) FROM questions WHERE exam_id = e.id) as question_count,

@@ -98,7 +98,7 @@ const getTeacherAnalytics = async (req, res, next) => {
     const [examPerformance] = await pool.query(
       `SELECT e.title, AVG(r.percentage) as avg_score, COUNT(r.id) as student_count
        FROM results r JOIN exams e ON r.exam_id = e.id
-       WHERE e.teacher_id = ? GROUP BY e.id, e.title ORDER BY e.created_at DESC LIMIT 10`,
+       WHERE e.teacher_id = ? GROUP BY e.id, e.title, e.created_at ORDER BY e.created_at DESC LIMIT 10`,
       [teacherId]
     );
 

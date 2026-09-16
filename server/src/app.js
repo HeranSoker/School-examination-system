@@ -27,7 +27,7 @@ app.use(helmet());
 // CORS configuration
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
-  : '*';
+  : true;
 
 app.use(
   cors({
