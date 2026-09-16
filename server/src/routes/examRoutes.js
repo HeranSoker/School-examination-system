@@ -7,7 +7,7 @@ router.use(authenticate);
 
 router.get('/', authorize('admin', 'teacher'), getExams);
 router.post('/', authorize('admin', 'teacher'), createExam);
-router.get('/:id', authorize('admin', 'teacher'), getExam);
+router.get('/:id', authorize('admin', 'teacher', 'student'), getExam);
 router.put('/:id', authorize('admin', 'teacher'), authorizeExamOwner, updateExam);
 router.delete('/:id', authorize('admin', 'teacher'), authorizeExamOwner, deleteExam);
 router.post('/:id/publish', authorize('admin', 'teacher'), authorizeExamOwner, publishExam);

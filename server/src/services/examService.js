@@ -61,25 +61,42 @@ class ExamService {
   }
 
   async canStudentTakeExam(examId, studentId) {
-    // Check exam exists and is active
+    // Update statuses first based on current time
+    await this.updateExamStatus();
+
     const [exams] = await pool.query(
-      'SELECT * FROM exams WHERE id = ? AND status = ?',
-      [examId, 'active']
+      'SELECT * FROM exams WHERE id = ?',
+      [examId]
     );
 
     if (exams.length === 0) {
-      return { canTake: false, reason: 'Exam is not available.' };
+      return { canTake: false, reason: 'Exam not found.' };
     }
 
     const exam = exams[0];
+
+    if (exam.status === 'draft') {
+      return { canTake: false, reason: 'This exam is still a draft and has not been published.' };
+    }
+
+    if (exam.status === 'completed') {
+      return { canTake: false, reason: 'This exam has concluded.' };
+    }
+
     const now = new Date();
 
     if (exam.start_time && now < new Date(exam.start_time)) {
-      return { canTake: false, reason: 'Exam has not started yet.' };
+      return { 
+        canTake: false, 
+        reason: `Exam has not started yet. Starts on ${new Date(exam.start_time).toLocaleString()}` 
+      };
     }
 
     if (exam.end_time && now > new Date(exam.end_time)) {
-      return { canTake: false, reason: 'Exam has ended.' };
+      return { 
+        canTake: false, 
+        reason: `Exam window has closed. Ended on ${new Date(exam.end_time).toLocaleString()}` 
+      };
     }
 
     // Check student's class is assigned if exam has specific classes
@@ -95,7 +112,7 @@ class ExamService {
       );
 
       if (student.length === 0 || !student[0].class_id) {
-        return { canTake: false, reason: 'Student not assigned to a class.' };
+        return { canTake: false, reason: 'Your student account is not assigned to a class. Please ask your administrator to assign you to a class.' };
       }
 
       const [classAssignment] = await pool.query(
